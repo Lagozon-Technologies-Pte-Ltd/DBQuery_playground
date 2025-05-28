@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="static/styles.css">
     <!-- Prism.js for Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-    <link rel="shortcut icon" href="static\favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="static/favicon.png" type="image/x-icon">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
@@ -19,22 +19,35 @@
 </head>
 
 <body>
-
     <header>
         <img src="static/logo.png" alt="DBQuery Logo" class="logo">
         <h1>Generative AI Assistant to your Database</h1>
-        <img src="static\DBQueryLogo.png" alt="dbquery logo" class="db-logo">
+        <img src="static/DBQueryLogo.png" alt="dbquery logo" class="db-logo">
     </header>
     <main style="display: flex;">
-
         <!-- Chat Container (Left Side) -->
         <div id="chat-container" style="width: 45%; padding: 15px;">
-            <h2 style="display: flex; align-items: center;">
-                Chat Assistant
-                <img src="static/reset.png" alt="Reset Session" class="reset-icon" onclick="resetSession()"
-                    style="cursor: pointer; margin-left: 10px; width: 24px; height: 24px;">
-                <p id="connection-status" style="color: green; font-weight: 100; padding-left: 160px; font-size: 20px;">Select a database to connect</p>
-            </h2>
+            <div class="chat-header">
+                <h2 style="display: flex; align-items: center; margin: 0;">
+                    Chat Assistant
+                    <img src="static/reset.png" alt="Reset Session" class="reset-icon" onclick="resetSession()"
+                        style="cursor: pointer; margin-left: 10px; width: 24px; height: 24px;">
+                </h2>
+                <p id="connection-status" class="connection-info">Select a database to connect</p>
+            </div>
+            
+            <!-- Radio options in vertical layout -->
+            <div class="radio-options">
+            <label style="display: flex; align-items: center; gap: 6px;">
+                <input type="radio" name="questionType" value="generic" checked>
+                Generic Question
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px;">
+                <input type="radio" name="questionType" value="usecase">
+                Usecase-Based Question
+            </label>                
+            </div>
+
             <div id="unified-input-container">
                 <select name="database" id="database-dropdown" onchange="connectToDatabase(this.value);" required>
                     <option value="" disabled selected>Select Database</option>
@@ -45,26 +58,8 @@
                 
                 <select name="section" id="section-dropdown" onchange="fetchQuestions(this.value);" required disabled>
                     <option value="" disabled selected>Select Subject</option>
-                    <!-- Will be populated by JavaScript -->
                 </select>
-                
-                <!-- Hidden templates for each database's sections -->
-                <!-- Replace your template divs with this to test -->
-                <!-- <select id="gcp-sections" style="display:none;">
-                    <option value="Demo">Demo</option>
-                </select> -->
-
-                <!-- <select id="postgresql-sections" style="display:none;">
-                    <option value="Finance">Finance</option>
-                    <option value="Customer Support">Customer Support</option>
-                    <option value="HR">HR</option>
-                    <option value="Healthcare">Healthcare</option>
-                    <option value="Insurance">Insurance</option>
-                    <option value="Inventory">Inventory</option>
-                    <option value="Legal">Legal</option>
-                    <option value="Sales">Sales</option>
-                </select>            -->
-             </div>
+            </div>
 
             <div id="chat-messages" class="chat-history">
                 <!-- Messages will be dynamically inserted here -->
@@ -84,7 +79,7 @@
                 <div class="chatinput-wrapper">
                     <input list="faq-questions" id="chat_user_query" name="user_query"
                         placeholder="Enter your query here..."
-                        style="flex: 1; box-sizing: border-box;  font-size: 16px;">
+                        style="flex: 1; box-sizing: border-box; font-size: 16px;">
 
                     <!-- Dynamically updated datalist -->
                     <datalist id="faq-questions">
@@ -94,7 +89,7 @@
                     <button id="chat-mic-button" type="button" onclick="toggleRecording()">
                         <img src="static/mic.png" alt="Mic" class="mic-icon">
                     </button>
-                    <img id="send-button" src="static\send.png" onclick="sendMessage()"></img>
+                    <img id="send-button" src="static/send.png" onclick="sendMessage()" alt="Send">
                 </div>
             </div>
         </div>
@@ -142,14 +137,14 @@
                         <div class="modal-content">
                             <span class="close-btn" onclick="closepromptPopup()">&times;</span>
                             <h2>Prompt</h2>
-                            <pre><code id="lang-prompt-content" ></code></pre>
+                            <pre><code id="lang-prompt-content"></code></pre>
                         </div>
                     </div>
                     <div id="interp-prompt-popup" class="modal">
                         <div class="modal-content">
                             <span class="close-btn" onclick="closeinterpromptPopup()">&times;</span>
                             <h2>Prompt</h2>
-                            <pre><code id="interp-prompt-content" ></code></pre>
+                            <pre><code id="interp-prompt-content"></code></pre>
                         </div>
                     </div>
 
@@ -201,7 +196,6 @@
             </div>
         </div>
     </main>
-    <script src="static/script.js"></script>
-
+   
 </body>
 </html>

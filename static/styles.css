@@ -899,3 +899,42 @@ table tr:hover {
         font-size: 16px;
     }
 }
+
+  /* Additional styles for radio buttons */
+        .radio-options {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .radio-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 0;
+        }
+        
+        .radio-options input[type="radio"] {
+            margin: 0;
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Adjust header layout */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .connection-info {
+            color: green;
+            font-weight: 100;
+            font-size: 20px;
+            margin-left: auto;
+            padding-left: 10px;
+        }
+

@@ -912,3 +912,49 @@ function showinterPrompt() {
 function closeinterpromptPopup() {
     document.getElementById("interp-prompt-popup").style.display = "none";
 }
+
+
+// to handle the radio button for generic and usecasebased question
+
+// Function to handle radio button changes
+        function handleQuestionTypeChange() {
+            const questionType = document.querySelector('input[name="questionType"]:checked').value;
+            console.log("Selected question type:", questionType);
+            return questionType;
+        }
+
+        // Function to get the selected question type
+        function getSelectedQuestionType() {
+            return document.querySelector('input[name="questionType"]:checked').value;
+        }
+
+        // Modify your sendMessage function to use the question type
+        function sendMessage() {
+            const questionType = getSelectedQuestionType();
+            // Your existing sendMessage logic here
+            console.log("Sending message with question type:", questionType);
+            // ... rest of your sendMessage implementation
+        }
+
+        // Add event listeners to radio buttons
+        document.getElementById('genericQuestion').addEventListener('change', handleQuestionTypeChange);
+        document.getElementById('usecaseQuestion').addEventListener('change', handleQuestionTypeChange);
+ 
+
+        document.querySelectorAll('input[name="questionType"]').forEach(radio => {
+        radio.addEventListener('change', async (event) => {
+        const selectedValue = event.target.value;
+
+        // Send selected option to backend
+        await fetch('/set-question-type', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question_type: selectedValue })
+        });
+
+        // Optionally handle a response or update UI
+       
+        });
+    });
