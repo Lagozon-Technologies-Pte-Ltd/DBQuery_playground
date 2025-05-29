@@ -903,7 +903,7 @@ async def set_question_type(payload: QuestionTypeRequest):
     global current_question_type
     current_question_type = payload.question_type
 
-    filename = "general_prompt.yaml" if current_question_type == "generic" else "chatbot_prompt.yaml"
+    filename = "generic_prompt.yaml" if current_question_type == "generic" else "chatbot_prompt.yaml"
     prompts = load_prompts(filename)
 
     print("Received question type:", current_question_type)
