@@ -4,7 +4,7 @@ from google.cloud import bigquery
 import datetime
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder,FewShotChatMessagePromptTemplate,PromptTemplate # type: ignore
-from examples import get_example_selector
+
 
 import pandas as pd
 import os
@@ -14,6 +14,11 @@ from langchain.chains.openai_tools import create_extraction_chain_pydantic
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI 
 #from  langchain_openai.chat_models import with_structured_output
+import json
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
+
 
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 llm = ChatOpenAI(model=configure.selected_models, temperature=0)
@@ -442,3 +447,36 @@ def get_business_rule(intent, file_path='business_rules.txt'):
     rule = business_rules.get(key)
 
     return rule if rule else f"No business rule defined for intent: {intent}"
+
+def get_example_selector(json_file_path: str):
+    """
+    Returns a SemanticSimilarityExampleSelector initialized with examples from a JSON file.
+    
+    Args:
+        json_file_path (str): Path to the JSON file containing examples
+        
+    Returns:
+        SemanticSimilarityExampleSelector: Selector configured with examples
+    """
+    # Load examples from JSON file
+    with open(json_file_path, 'r', encoding='utf-8') as file:
+        examples = json.load(file)
+    
+    # Validate examples structure
+    if not isinstance(examples, list):
+        raise ValueError("JSON file should contain a list of examples")
+    if len(examples) == 0:
+        raise ValueError("No examples found in JSON file")
+    if not all(isinstance(example, dict) and 'input' in example and 'query' in example for example in examples):
+        raise ValueError("Each example should be a dictionary with 'input' and 'query' keys")
+    
+    # Create example selector
+    example_selector = SemanticSimilarityExampleSelector.from_examples(
+        examples,
+        OpenAIEmbeddings(),
+        Chroma,
+        k=3,
+        input_keys=["input"],
+    )
+    
+    return example_selector

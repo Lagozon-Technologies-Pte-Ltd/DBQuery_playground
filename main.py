@@ -25,7 +25,7 @@ from logging.config import dictConfig
 import automotive_wordcloud_analysis as awa
 import zipfile
 from wordcloud import WordCloud
-from examples import get_example_selector
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -519,6 +519,7 @@ def load_prompts(filename:str):
     except Exception as e:
         print(f"Error reading prompts file: {e}")
         return {}
+    
 
 @app.post("/submit_feedback/")
 @app.post("/submit_feedback")
@@ -601,6 +602,82 @@ def get_keyphrases():
 
 if 'messages' not in session_state:
     session_state['messages'] = []
+    
+def parse_table_data(csv_file_path):
+    """
+    Parses a CSV file containing table definitions and returns structured data.
+    
+    Args:
+        csv_file_path (str): Path to the CSV file
+        
+    Returns:
+        dict: A dictionary with table names as keys and their metadata as values
+              Format: {
+                  'table_name': {
+                      'description': 'table description',
+                      'columns': [
+                          {
+                              'name': 'column_name',
+                              'type': 'data_type',
+                              'nullable': boolean,
+                              'description': 'column description'
+                          },
+                          ...
+                      ]
+                  },
+                  ...
+              }
+    """
+    tables = defaultdict(lambda: {
+        'description': '',
+        'columns': []
+    })
+    
+    with open(csv_file_path, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        
+        for row in reader:
+            if len(row) < 3:  # Skip incomplete rows
+                continue
+                
+            table_name = row[0].strip()
+            table_description = row[1].strip()
+            column_info = row[2].strip()
+            
+            # Parse column information (name, type, nullable, description)
+            if '(' in column_info:
+                # Extract column name and type
+                col_name = column_info.split('(')[0].strip()
+                type_part = column_info.split('(')[1].split(')')[0].strip()
+                
+                # Check for NULLABLE
+                nullable = 'NULLABLE' in column_info
+                
+                # Extract description (after colon if present)
+                if ':' in column_info:
+                    col_desc = column_info.split(':')[-1].strip()
+                else:
+                    col_desc = ''
+            else:
+                col_name = column_info
+                type_part = ''
+                nullable = False
+                col_desc = ''
+            
+            # Ensure table exists in dictionary
+            if table_name not in tables:
+                tables[table_name]['description'] = table_description
+            
+            # Add column information
+            tables[table_name]['columns'].append({
+                'name': col_name,
+                'type': type_part,
+                'nullable': nullable,
+                'description': col_desc
+            })
+    
+    return dict(tables)
+
 
 @app.post("/submit")
 async def submit_query(
@@ -643,6 +720,7 @@ async def submit_query(
        # **Step 1: Invoke Unified Prompt**
         key_parameters = get_key_parameters()
         keyphrases = get_keyphrases()
+        
         unified_prompt = PROMPTS["unified_prompt"].format(user_query=user_query, chat_history=chat_history, key_parameters=key_parameters, keyphrases=keyphrases)
         llm_reframed_query = llm.invoke(unified_prompt).content.strip()
         logger.info(f"LLM Unified Prompt Response: {llm_reframed_query}")
@@ -680,8 +758,8 @@ async def submit_query(
 
         selected_business_rule= get_business_rule(intent = intent_result["intent"])
         
-        selector = get_example_selector()
-        best_example = selector.select_examples({"input": user_query})
+        selector = get_example_selector("sql_query_examples.json")
+        best_example = selector.select_examples({"input": llm_reframed_query})
         print(best_example[0]["query"])  # Returns the closest SQL query
           
         response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
