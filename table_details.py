@@ -88,7 +88,32 @@ def get_tables(tables: List[Table]) -> List[str]:
     tables  = [table.name for table in tables]
     return tables
 
+def get_table_metadata(selected_subject='Demo'):
+    """
+    Returns a list of table names and their descriptions from a subject-specific CSV file.
+    - selected_subject: base name of CSV file (without .csv)
+    """
+    path = f'table_files/{selected_subject}.csv'
+    
+    try:
+        table_description = pd.read_csv(path)
+    except FileNotFoundError:
+        return f"File not found: {path}"
+    except Exception as e:
+        return f"Error reading file: {e}"
 
+    if 'table_name' not in table_description.columns or 'table_description' not in table_description.columns:
+        return "CSV must contain 'table_name' and 'table_description' columns."
+
+    # Drop duplicates and sort
+    unique_tables = table_description[['table_name', 'table_description']].drop_duplicates().sort_values('table_name')
+
+    # Convert to formatted string
+    table_info = ""
+    for _, row in unique_tables.iterrows():
+        table_info += f"Table Name: {row['table_name']}\nDescription: {row['table_description']}\n\n"
+
+    return table_info.strip()
 # table_names = "\n".join(db.get_usable_table_names())
 # table_details = get_table_details()
 # print("testinf details",table_details, type(table_details))

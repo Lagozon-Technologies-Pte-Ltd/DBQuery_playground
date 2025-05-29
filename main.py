@@ -25,6 +25,7 @@ from logging.config import dictConfig
 import automotive_wordcloud_analysis as awa
 import zipfile
 from wordcloud import WordCloud
+from table_details import get_table_details, get_table_metadata  # Importing the function
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -112,7 +113,6 @@ openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 databases = ["GCP", "PostgreSQL-Azure"]
 question_dropdown = os.getenv('Question_dropdown')
 llm = ChatOpenAI(model=gpt_model, temperature=0)  # Adjust model as necessary
-from table_details import get_table_details  # Importing the function
 if 'messages' not in session_state:
     session_state['messages'] = []
 
@@ -569,23 +569,7 @@ async def submit_feedback(request: Request):
         session.close()
         return JSONResponse(content={"success": False, "message": f"Error submitting feedback: {str(e)}"}, status_code=500)
 
-# @app.get("/get-tables/")
-# async def get_tables(selected_section: str):
-#     """
-#     Fetches table names for a given section using the get_table_details function.
 
-#     Args:
-#         selected_section (str): The section to fetch tables for.
-
-#     Returns:
-#         JSONResponse: A JSON response containing the list of table names.
-#     """
-#     # Fetch table details for the selected section
-#     table_details = get_table_details(selected_section)
-#     # Extract table names dynamically
-#     tables = [line.split("Table Name:")[1].strip() for line in table_details.split("\n") if "Table Name:" in line]
-#     # Return tables as JSON
-#     return {"tables": tables}
 import csv
 
 def get_keyphrases():
@@ -640,40 +624,68 @@ async def submit_query(
     logger.info(f"Chat history: {chat_history}")
     try:
        # **Step 1: Invoke Unified Prompt**
+        prompts = getattr(request.app.state, "prompts", None)
+        current_question_type = getattr(request.app.state, "current_question_type", None)
+        logger.info(f"Selected query type: {current_question_type}")
+
         key_parameters = get_key_parameters()
         keyphrases = get_keyphrases()
-        unified_prompt = PROMPTS["unified_prompt"].format(user_query=user_query, chat_history=chat_history, key_parameters=key_parameters, keyphrases=keyphrases)
-        llm_reframed_query = llm.invoke(unified_prompt).content.strip()
-        logger.info(f"LLM Unified Prompt Response: {llm_reframed_query}")
-        intent_result = intent_classification(llm_reframed_query)
-        logger.info(f"Intent Result: {intent_result}")
+        
+        # For usecase specific logic
+        if current_question_type == "usecase":
+            unified_prompt = prompts["unified_prompt"].format(user_query=user_query, chat_history=chat_history, key_parameters=key_parameters, keyphrases=keyphrases)
+            llm_reframed_query = llm.invoke(unified_prompt).content.strip()
+            logger.info(f"LLM Unified Prompt Response: {llm_reframed_query}")
+            intent_result = intent_classification(llm_reframed_query)
+            logger.info(f"Intent Result: {intent_result}")
+            if intent_result:
+                intent = intent_result["intent"]
+                chosen_tables = intent_result["tables"]
+            else:
+                error_msg = "Please rephrase or add more details to your question as I am not able to assess the Intended Use case"
+                session_state['messages'].append({
+                    "role": "assistant",
+                    "content": error_msg
+                })
+                
+                response_data = {
+                    "user_query": session_state['user_query'],
+                    "query": "",
+                    "tables": "",
+                    "llm_response": llm_reframed_query,
+                    "chat_response": error_msg,
+                    "history": session_state['messages'],
+                    "interprompt": unified_prompt,
+                    "langprompt": ""
+                }
+                return JSONResponse(content=response_data)
 
-        if intent_result:
-            intent = intent_result["intent"]
-            intent_table = intent_result["tables"]
+        # For generic specific logic
+        if current_question_type == "generic":
+            tables_metadata = get_table_metadata(selected_subject=selected_subject)
+            unified_prompt = prompts["unified_prompt"].format(
+                user_query=user_query,
+                chat_history=chat_history,
+                key_parameters=key_parameters,
+                keyphrases=keyphrases,
+                table_metadata=tables_metadata
+            )
+
+
+            llm_response_str = "hii all"
+            logger.info("LLM raw response: %s", llm_response_str)
+
+            try:
+                llm_result = json.loads(llm_response_str)
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse LLM response as JSON: {e}")
+                raise HTTPException(status_code=500, detail=f"Failed to parse LLM response as JSON: {e}")
+
+            llm_reframed_query = llm_result.get("rephrased_query", "")
+            chosen_tables = llm_result.get("tables_chosen", [])
             
-        # if not intent_table:
-        #     intent_table = "Please rephrase or add more details to your question as I am not able to assess the Intended Use case"
-        else:
-            error_msg = "Please rephrase or add more details to your question as I am not able to assess the Intended Use case"
-            session_state['messages'].append({
-                "role": "assistant",
-                "content": error_msg
-            })
-            
-            response_data = {
-                "user_query": session_state['user_query'],
-                "query": "",
-                "tables": "",
-                "llm_response": llm_reframed_query,
-                "chat_response": error_msg,
-                "history": session_state['messages'],
-                "interprompt": unified_prompt,
-                "langprompt": ""
-            }
-            return JSONResponse(content=response_data)
-        table_details = get_table_details(selected_subject=selected_subject,table_name=intent_table)
-        logger.info(f"Intent table: {intent_table}")
+        table_details = get_table_details(selected_subject=selected_subject,table_name=chosen_tables)
+        logger.info(f"Intent table: {chosen_tables}")
         logger.info(f"Chosen Intent: {intent}")
         logger.info(f"table details: {table_details}")
 
@@ -723,12 +735,7 @@ async def submit_query(
         # **Step 5: Prepare Table Data**
         tables_html = prepare_table_html(tables_data, page, records_per_page)
 
-        # **Step 6: Append Table Data to Chat History**
-        # if tables_html:
-        #     session_state['messages'].append({
-        #         "role": "table_data",
-        #         "content": f"\n{tables_data}"
-        #     })
+     
 
         # **Step 7: Return Response**
         response_data = {
@@ -899,14 +906,15 @@ current_question_type = "generic"
 class QuestionTypeRequest(BaseModel):
     question_type: str
 @app.post("/set-question-type")
-async def set_question_type(payload: QuestionTypeRequest):
+async def set_question_type(payload: QuestionTypeRequest, request:Request):
     global current_question_type
     current_question_type = payload.question_type
 
     filename = "generic_prompt.yaml" if current_question_type == "generic" else "chatbot_prompt.yaml"
     prompts = load_prompts(filename)
-
+    # Store prompts in app.state for global access
+    request.app.state.prompts = prompts
+    request.app.state.current_question_type = current_question_type
     print("Received question type:", current_question_type)
-    print("Loaded prompts:", prompts)
 
     return JSONResponse(content={"message": "Question type set", "prompts": prompts})

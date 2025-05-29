@@ -3,33 +3,39 @@ unified_prompt: |
 
   Task Overview:
   1. Reframe the user query as a clear, unambiguous instruction suitable for SQL query generation.
-  2. Identify and list which database tables might be useful for fulfilling the rephrased query, based on the provided metadata.
+  2. Identify and list which database tables might be useful for fulfilling the rephrased query, based on the provided table metadata.
 
   Instructions:
-  - While rephrasing, incorporate all relevant parameters from the conversation context. Do not ask the user for additional information.
-  - Always return two items:
-    (a) A single-sentence rephrased query.
-    (b) A list of potentially useful tables for that query based on table metadata.
-  - Preserve important phrases exactly as written in the `{keyphrases}` list.
-  - If chat history is available, include relevant details of key parameters `{key_parameters}` from prior queries.
-  - If there is no chat history, rephrase the query in one simple, clear statement.
+  - Output should be returned strictly as a JSON object with the keys:
+    - "rephrased_query": A single-sentence, SQL-ready interpretation of the user’s intent.
+    - "tables_chosen": A list of table names from the provided metadata that are relevant to the query.
+
+  - While rephrasing:
+    - Incorporate all relevant parameters from the conversation context `{chat_history}`.
+    - Use important phrases from `{keyphrases}` exactly as written.
+    - Use key details from `{key_parameters}` if found in prior queries.
+    - Do not ask the user for more information.
+    - If no chat history is available, treat the query as a new question and provide a simple rephrased query.
 
   Inputs:
-  Chat History:  
-  {chat_history}
+  - Chat History:  
+    {chat_history}
 
-  User Query:  
-  {user_query}
+  - User Query:  
+    {user_query}
 
-  Key Parameters:  
-  {key_parameters}
+  - Key Parameters:  
+    {key_parameters}
 
-  Important Phrases (must remain intact):  
-  {keyphrases}
+  - Important Phrases:  
+    {keyphrases}
 
-  Table Metadata:  
-  {table_metadata}
+  - Table Metadata:  
+    {table_metadata}
 
-  Expected Output:
-  Rephrased Query: <your rephrased query here>  
-  Relevant Tables: [<table_1>, <table_2>, ...]
+  Expected JSON Output Format:
+  ```json
+  {
+    "rephrased_query": "<your rephrased query here>",
+    "tables_chosen": ["<table_1>", "<table_2>", "..."]
+  }
