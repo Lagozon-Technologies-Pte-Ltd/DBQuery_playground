@@ -640,6 +640,8 @@ async def submit_query(
             logger.info(f"Intent Result: {intent_result}")
             if intent_result:
                 intent = intent_result["intent"]
+                logger.info(f"Chosen Intent: {intent}")
+
                 chosen_tables = intent_result["tables"]
             else:
                 error_msg = "Please rephrase or add more details to your question as I am not able to assess the Intended Use case"
@@ -659,6 +661,15 @@ async def submit_query(
                     "langprompt": ""
                 }
                 return JSONResponse(content=response_data)
+            selected_business_rule= get_business_rule(intent = intent_result["intent"])
+
+
+            response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
+                llm_reframed_query, session_state['messages'], model, selected_subject, selected_database,table_details,selected_business_rule
+            )
+       
+      
+
 
         # For generic specific logic
         if current_question_type == "generic":
@@ -672,7 +683,7 @@ async def submit_query(
             )
 
 
-            llm_response_str = "hii all"
+            llm_response_str = llm.invoke(unified_prompt).content.strip()
             logger.info("LLM raw response: %s", llm_response_str)
 
             try:
@@ -683,21 +694,12 @@ async def submit_query(
 
             llm_reframed_query = llm_result.get("rephrased_query", "")
             chosen_tables = llm_result.get("tables_chosen", [])
-            
+            selector = get_example_selector("sql_query_examples.json")
+            best_example = selector.select_examples({"input": llm_reframed_query})
+
         table_details = get_table_details(selected_subject=selected_subject,table_name=chosen_tables)
         logger.info(f"Intent table: {chosen_tables}")
-        logger.info(f"Chosen Intent: {intent}")
         logger.info(f"table details: {table_details}")
-
-        selected_business_rule= get_business_rule(intent = intent_result["intent"])
-        
-
-
-        response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
-            llm_reframed_query, session_state['messages'], model, selected_subject, selected_database,table_details,selected_business_rule
-        )
-       
-      
 
         if isinstance(response, str):
             session_state['generated_query'] = response
