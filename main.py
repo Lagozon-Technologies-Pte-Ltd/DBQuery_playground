@@ -664,10 +664,7 @@ async def submit_query(
             selected_business_rule= get_business_rule(intent = intent_result["intent"])
 
 
-            response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
-                llm_reframed_query, session_state['messages'], model, selected_subject, selected_database,table_details,selected_business_rule
-            )
-       
+
       
 
 
@@ -694,10 +691,18 @@ async def submit_query(
 
             llm_reframed_query = llm_result.get("rephrased_query", "")
             chosen_tables = llm_result.get("tables_chosen", [])
-            selector = get_example_selector("sql_query_examples.json")
-            best_example = selector.select_examples({"input": llm_reframed_query})
+            selected_business_rule = ""
 
+       
+        
+        
+        
         table_details = get_table_details(selected_subject=selected_subject,table_name=chosen_tables)
+        response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
+                llm_reframed_query, session_state['messages'], model,
+                selected_subject, selected_database, table_details,
+                selected_business_rule, current_question_type
+            )
         logger.info(f"Intent table: {chosen_tables}")
         logger.info(f"table details: {table_details}")
 

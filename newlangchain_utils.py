@@ -241,11 +241,11 @@ db = BigQuerySQLDatabase()
 
 # print("Table info saved successfully to table_info.txt")
 # @cache_resource
-def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule):
+def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule,question_type):
     if selected_database == 'GCP':
         prompt_file = "GCP_prompt.txt"
-    if selected_database == 'PostgreSQL-Azure':
-        prompt_file = "Postgres_prompt.txt"
+    elif selected_database == 'PostgreSQL-Azure':
+        prompt_file = "Generic_postgres_prompt.txt" if question_type == "generic" else "Postgres_prompt.txt"
     
     
     llm = ChatOpenAI(model=selected_model, temperature=0)
@@ -265,18 +265,28 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
     )
     few_shot_prompt = FewShotChatMessagePromptTemplate(
         example_prompt=example_prompt,
-        example_selector=get_example_selector(),
+        example_selector=get_example_selector("sql_query_examples.json"),
         input_variables=["input","top_k","table_info"],
     )
     business_glossary = get_business_glossary_text()
-    final_prompt1 = ChatPromptTemplate.from_messages(
-        [
-            ("system", static_prompt.format(table_info=table_details, Business_Rule = selected_business_rule, Business_Glossary = business_glossary)),
-            few_shot_prompt,
-            MessagesPlaceholder(variable_name="messages"),
-            ("human", "{input}"),
-        ]
-    )
+    if question_type == "generic":
+        final_prompt1 = ChatPromptTemplate.from_messages(
+            [
+                ("system", static_prompt.format(table_info=table_details,  Business_Glossary = business_glossary)),
+                few_shot_prompt,
+                MessagesPlaceholder(variable_name="messages"),
+                ("human", "{input}"),
+            ]
+        )
+    elif question_type =="usecase":
+        final_prompt1 = ChatPromptTemplate.from_messages(
+            [
+                ("system", static_prompt.format(table_info=table_details, Business_Rule = selected_business_rule, Business_Glossary = business_glossary)),
+                few_shot_prompt,
+                MessagesPlaceholder(variable_name="messages"),
+                ("human", "{input}"),
+            ]
+        )
     final_prompt = final_prompt1
     print("langchain prompt: ", final_prompt)
     if selected_database=="GCP":
@@ -314,12 +324,15 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
 
 
 
-def invoke_chain(question, messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule):
+def invoke_chain(question, messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule,question_type):
     print(question, messages, selected_model, selected_subject, selected_database)
     try:
         print('Model used:', selected_model)
         history = create_history(messages)
-        chain,  SQL_Statement, db, final_prompt = get_chain(question, history.messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule)
+        chain, SQL_Statement, db, final_prompt = get_chain(
+            question, history.messages, selected_model, selected_subject,
+            selected_database, table_info, selected_business_rule, question_type
+        )
         print(f"Generated SQL Statement in newlangchain_utils: {SQL_Statement}")
         SQL_Statement = SQL_Statement.replace("SQL Query:", "").strip()
 
@@ -357,7 +370,7 @@ def invoke_chain(question, messages, selected_model, selected_subject, selected_
 
     except Exception as e:
         print("Error:", e)
-        return "Insufficient information to generate SQL Query.", [], {}, e,None
+        return "Error in invoke chain function", [], {}, e,None
 
 def create_history(messages):
     history = ChatMessageHistory()

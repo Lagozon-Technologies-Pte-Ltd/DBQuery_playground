@@ -39,10 +39,3 @@ def get_example_selector(json_file_path: str):
     return example_selector
 
 
-selector = get_example_selector("sql_query_examples.json")
-
-
-user_query = "Show me top 10 Simran OEM parts for En-Route in 2024"
-best_example = selector.select_examples({"input": user_query})
-print(best_example[0]["input"]) 
-print(best_example[0]["query"])
