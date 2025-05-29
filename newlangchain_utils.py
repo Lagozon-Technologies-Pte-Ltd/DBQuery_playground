@@ -241,7 +241,7 @@ db = BigQuerySQLDatabase()
 
 # print("Table info saved successfully to table_info.txt")
 # @cache_resource
-def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule):
+def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule,best_example):
     if selected_database == 'GCP':
         prompt_file = "GCP_prompt.txt"
     if selected_database == 'PostgreSQL-Azure':
@@ -271,7 +271,7 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
     business_glossary = get_business_glossary_text()
     final_prompt1 = ChatPromptTemplate.from_messages(
         [
-            ("system", static_prompt.format(table_info=table_details, Business_Rule = selected_business_rule, Business_Glossary = business_glossary)),
+            ("system", static_prompt.format(table_info=table_details, Business_Rule = selected_business_rule, Business_Glossary = business_glossary, best_example= best_example)),
             few_shot_prompt,
             MessagesPlaceholder(variable_name="messages"),
             ("human", "{input}"),
@@ -314,12 +314,12 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
 
 
 
-def invoke_chain(question, messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule):
+def invoke_chain(question, messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule,best_example=None):
     print(question, messages, selected_model, selected_subject, selected_database)
     try:
         print('Model used:', selected_model)
         history = create_history(messages)
-        chain,  SQL_Statement, db, final_prompt = get_chain(question, history.messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule)
+        chain,  SQL_Statement, db, final_prompt = get_chain(question, history.messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule,best_example)
         print(f"Generated SQL Statement in newlangchain_utils: {SQL_Statement}")
         SQL_Statement = SQL_Statement.replace("SQL Query:", "").strip()
 

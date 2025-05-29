@@ -25,6 +25,7 @@ from logging.config import dictConfig
 import automotive_wordcloud_analysis as awa
 import zipfile
 from wordcloud import WordCloud
+from examples import get_example_selector
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -681,10 +682,12 @@ async def submit_query(
 
         selected_business_rule= get_business_rule(intent = intent_result["intent"])
         
-
-
+        selector = get_example_selector()
+        best_example = selector.select_examples({"input": user_query})
+        print(best_example[0]["query"])  # Returns the closest SQL query
+          
         response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
-            llm_reframed_query, session_state['messages'], model, selected_subject, selected_database,table_details,selected_business_rule
+            llm_reframed_query, session_state['messages'], model, selected_subject, selected_database,table_details,selected_business_rule,best_example=best_example[0]["query"] 
         )
        
       

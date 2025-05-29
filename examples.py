@@ -1,261 +1,45 @@
 examples = [
     {
-        "input": "list all the employees",
-        "query": "SELECT * FROM lz_employees",
-        "contexts": " | ".join([
-            "Table: lz_employees",
-            "Columns: employee_id, employee_name, department_id, salary, hire_date, last_name, first_name, email, job_title, full_name",
-            "Description: This table has information related to the employees like employee id, hire date, salary, last name, first name, email, department, job title, full name."
-        ])
+        "input": "Generate a word cloud for the MODEL Group description \"BOLERO\" based on data from 01-Jan-2024 to 31-Mar-2024.",
+        "query": "SELECT   mm.MODL_GROP_DESC AS Model_Grop,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatim,  COUNT(cv.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIM cvJOIN MH_RO_HDR_DETAILS rhd ON cv.sv_ro_hdr_sk = rhd.sv_ro_hdr_skJOIN MH_MODEL_MASTER mm ON LOWER(rhd.MODL_CD) = LOWER(mm.MODL_CD)WHERE LOWER(mm.MODL_GROP_DESC) = LOWER('BOLERO')  AND rhd.RO_BILL_DATE BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%km%'GROUP BY   mm.MODL_GROP_DESC,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatimORDER BY frequency_count DESC;"
     },
     {
-        "input": "list all performance reviews",
-        "query": "SELECT * FROM lz_performance_reviews",
-        "contexts": " | ".join([
-            "Table: lz_performance_reviews",
-            "Columns: review_id, employee_id, rating, goals_met, strengths, weaknesses, development_plan",
-            "Description: This is a table that stores information about employee performance evaluations, including ratings, goals met, strengths, weaknesses, and development plans."
-        ])
+        "input": "Generate a Word Cloud for the FAMLY_DESC \"XUV700 Diesel AT\".",
+        "query": "SELECT   mm.MODL_GROP_DESC AS Model_Grop,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatim,  COUNT(cv.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIM cvJOIN MH_RO_HDR_DETAILS rhd ON cv.sv_ro_hdr_sk = rhd.sv_ro_hdr_skJOIN MH_MODEL_MASTER mm ON LOWER(rhd.MODL_CD) = LOWER(mm.MODL_CD)WHERE LOWER(mm.FAMLY_DESC) = LOWER('XUV700 Diesel AT')  AND (    (LOWER(rhd.SERV_CATGRY_DESC) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(rhd.service_group) = LOWER('mechanical'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('bodyshop') AND LOWER(rhd.service_group) = LOWER('accessories'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('bodyshop') AND LOWER(rhd.service_group) = LOWER('bodyshop'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('sales & service') AND LOWER(rhd.service_group) = LOWER('accessories'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('bodyshop') AND LOWER(rhd.service_group) = LOWER('pre-sale/pdi'))  )  AND LOWER(cv.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%km%'GROUP BY   mm.MODL_GROP_DESC,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatimORDER BY frequency_count DESC;"
     },
     {
-        "input": "list all organizations",
-        "query": "SELECT * FROM lz_organizations",
-        "contexts": " | ".join([
-            "Table: lz_organizations",
-            "Columns: organization_id, organization_name, description",
-            "Description: This is a table that stores information about different functions or departments inside a company, including their names and descriptions."
-        ])
+        "input": "Generate a Word Cloud for the Dealer \"PROVINCIAL AUTOMOBILE CO. PVT. LTD\" for the period from 01-Jan-2024 to 31-Mar-2024.",
+        "query": "SELECT  mh_ad_ai.delr_name AS Dealer_Name,  mh_cust_verbatim.verbatim_group,  mh_cust_verbatim.verbatim_code,  mh_cust_verbatim.cust_verbtm_desc,  mh_cust_verbatim.verbatim_group_desc,  mh_cust_verbatim.demanded_verbatim,  COUNT(mh_cust_verbatim.verbatim_code) AS frequency_countFROM MH_RO_HDR_DETAILS AS mh_roJOIN MH_CUST_VERBATIM AS mh_cust_verbatim  ON mh_ro.sv_ro_hdr_sk = mh_cust_verbatim.sv_ro_hdr_skJOIN MH_AD_AI_DIMENSION AS mh_ad_ai  ON LOWER(mh_ro.parnt_grop) = LOWER(mh_ad_ai.parnt_grop)  AND LOWER(mh_ro.loctn_cd) = LOWER(mh_ad_ai.loctn_cd)  AND LOWER(mh_ro.prodct_divsn) = LOWER(mh_ad_ai.prodct_divsn)WHERE LOWER(mh_ad_ai.delr_name) = LOWER('PROVINCIAL AUTOMOBILE CO. PVT. LTD')  AND mh_ro.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND (    (LOWER(mh_ro.serv_catgry_desc) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(mh_ro.service_group) = 'mechanical')    OR (LOWER(mh_ro.serv_catgry_desc) = 'bodyshop' AND LOWER(mh_ro.service_group) IN ('accessories', 'bodyshop'))    OR (LOWER(mh_ro.serv_catgry_desc) = 'sales & service' AND LOWER(mh_ro.service_group) = 'accessories')    OR (LOWER(mh_ro.serv_catgry_desc) = 'bodyshop' AND LOWER(mh_ro.service_group) = 'pre-sale/pdi')  )  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%km%'GROUP BY  mh_ad_ai.delr_name,  mh_cust_verbatim.verbatim_group,  mh_cust_verbatim.verbatim_code,  mh_cust_verbatim.cust_verbtm_desc,  mh_cust_verbatim.verbatim_group_desc,  mh_cust_verbatim.demanded_verbatimORDER BY frequency_count DESC;"
+    },
+     {
+        "input": "Generate a Word Cloud for the Area Office \"Calcutta\" for the period from 01-Jan-2024 to 31-Mar-2024.",
+        "query": "SELECT   mm.MODL_GROP_DESC AS Model_Grop,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatim,  COUNT(cv.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIM cvJOIN MH_RO_HDR_DETAILS rhd ON cv.sv_ro_hdr_sk = rhd.sv_ro_hdr_skJOIN MH_MODEL_MASTER mm ON LOWER(rhd.MODL_CD) = LOWER(mm.MODL_CD)JOIN MH_AD_AI_DIMENSION dim ON   LOWER(rhd.PARNT_GROP) = LOWER(dim.parnt_grop) AND  LOWER(rhd.LOCTN_CD) = LOWER(dim.loctn_cd) AND  LOWER(rhd.PRODCT_DIVSN) = LOWER(dim.prodct_divsn)WHERE   LOWER(dim.area_name) = LOWER('Calcutta')  AND rhd.RO_BILL_DATE BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND (    (LOWER(rhd.SERV_CATGRY_DESC) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(rhd.service_group) = 'mechanical')    OR (LOWER(rhd.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(rhd.service_group) IN ('accessories', 'bodyshop'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = 'sales & service' AND LOWER(rhd.service_group) = 'accessories')    OR (LOWER(rhd.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(rhd.service_group) = 'pre-sale/pdi')  )  AND LOWER(cv.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%km%'GROUP BY   mm.MODL_GROP_DESC,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatimORDER BY frequency_count DESC;"
     },
     {
-        "input": "list all training programs",
-        "query": "SELECT * FROM lz_training_programs",
-        "contexts": " | ".join([
-            "Table: lz_training_programs",
-            "Columns: program_id, program_name, description, duration, is_required",
-            "Description: This is a table that stores information about training programs offered by an organization, including their names, descriptions, duration, and whether they are required for specific roles."
-        ])
+        "input": "Generate a Word Cloud for the \"West Zone\" covering the period from 01-Jan-2024 to 31-Mar-2024.",
+        "query": "SELECT   LOWER(MH_AD_AI_DIMENSION.zone_name) AS Dealer_Zone,  LOWER(MH_AD_AI_DIMENSION.area_name) AS Dealer_AREA_Office,  MH_CUST_VERBATIM.verbatim_group,  MH_CUST_VERBATIM.verbatim_code,  MH_CUST_VERBATIM.cust_verbtm_desc,  MH_CUST_VERBATIM.verbatim_group_desc,  MH_CUST_VERBATIM.demanded_verbatim,  COUNT(MH_CUST_VERBATIM.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIMJOIN MH_RO_HDR_DETAILS ON MH_CUST_VERBATIM.sv_ro_hdr_sk = MH_RO_HDR_DETAILS.sv_ro_hdr_skJOIN MH_AD_AI_DIMENSION ON   LOWER(MH_AD_AI_DIMENSION.parnt_grop) = LOWER(MH_RO_HDR_DETAILS.parnt_grop) AND  LOWER(MH_AD_AI_DIMENSION.loctn_cd) = LOWER(MH_RO_HDR_DETAILS.loctn_cd) AND  LOWER(MH_AD_AI_DIMENSION.prodct_divsn) = LOWER(MH_RO_HDR_DETAILS.prodct_divsn)WHERE   LOWER(MH_AD_AI_DIMENSION.zone_name) = LOWER('West Zone')  AND MH_RO_HDR_DETAILS.RO_BILL_DATE BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND (    (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(MH_RO_HDR_DETAILS.service_group) = 'mechanical')    OR (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(MH_RO_HDR_DETAILS.service_group) IN ('accessories', 'bodyshop'))    OR (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) = 'sales & service' AND LOWER(MH_RO_HDR_DETAILS.service_group) = 'accessories')    OR (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(MH_RO_HDR_DETAILS.service_group) = 'pre-sale/pdi')  )  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%km%'GROUP BY   Dealer_Zone,  Dealer_AREA_Office,  MH_CUST_VERBATIM.verbatim_group,  MH_CUST_VERBATIM.verbatim_code,  MH_CUST_VERBATIM.cust_verbtm_desc,  MH_CUST_VERBATIM.verbatim_group_desc,  MH_CUST_VERBATIM.demanded_verbatimORDER BY frequency_count DESC;"
+    },
+ 
+    {
+        "input": "Provide the list of Top 10 consumed OEM parts under En-Route for the period from 01-Jan-2024 to 31-Dec-2024.",
+        "query": "SELECT   rp.part_code AS Part_Code,  rp.part_desc AS Part_Description,  ROUND(SUM(rp.part_quantity), 1) AS Total_Count,  ROUND(SUM(rp.partamount), 1) AS Total_ValueFROM MH_RO_PARTS rpJOIN MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skJOIN MH_AD_AI_DIMENSION dim ON   LOWER(dim.parnt_grop) = LOWER(rhd.parnt_grop) AND  LOWER(dim.loctn_cd) = LOWER(rhd.loctn_cd) AND  LOWER(dim.prodct_divsn) = LOWER(rhd.prodct_divsn)WHERE   LOWER(rp.oem_part_ind) = 'y'  AND rhd.serv_catgry_desc = 'En-Route'  AND rhd.service_group = 'Pre-Sale/PDI'  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'  AND LOWER(dim.zone_name) = LOWER('En-Route')  AND LOWER(rp.part_category_group) = LOWER('Spares')  AND rp.part_desc NOT ILIKE '%Filter%'GROUP BY rp.part_code, rp.part_descORDER BY Total_Value DESCLIMIT 10;"
     },
     {
-        "input": "list all employee training records",
-        "query": "SELECT * FROM lz_employee_training",
-        "contexts": " | ".join([
-            "Table: lz_employee_training",
-            "Columns: employee_id, program_id, completion_date, certificate_number",
-            "Description: This is a table that stores information about employee participation in training programs, including the employee's ID, the program's ID, the completion date, and the certificate number (if applicable)."
-        ])
+        "input": "Retrieve the list of Top 10 consumed OEM parts under the \"Pre-Sale/PDI\" category for the period from 01-Jan-2024 to 31-Dec-2024",
+        "query": "SELECT   rp.part_code AS \"Part Code\",  rp.part_desc AS \"Part Description\",  ROUND(SUM(rp.part_quantity), 1) AS \"Total Count\",  ROUND(SUM(rp.partamount), 1) AS \"Total Value\"FROM   MH_RO_PARTS rpJOIN   MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skWHERE   LOWER(rp.oem_part_ind) = LOWER('Y')  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'  AND (    (LOWER(rhd.serv_catgry_desc) IN (LOWER('En-Route'), LOWER('Pre-Sale/PDI')) AND LOWER(rhd.service_group) = LOWER('Pre-Sale/PDI'))  )  AND LOWER(rp.part_category_group) = LOWER('Spares')  AND rp.part_desc NOT LIKE '%Filter%'GROUP BY   rp.part_code, rp.part_descORDER BY   \"Total Value\" DESCLIMIT 10;"
     },
     {
-        "input": "count of training programs by requirement status",
-        "query": "SELECT is_required, COUNT(*) as program_count FROM lz_training_programs GROUP BY is_required",
-        "contexts": " | ".join([
-            "Table: lz_training_programs",
-            "Columns: program_id, program_name, is_required",
-            "Description: This table stores information about training programs, allowing the count of programs based on their requirement status."
-        ])
+        "input": "Retrieve the list of Top 10 consumed OEM parts under Accessories from 01-Jan-2024 to 31-Dec-2024.",
+        "query": "SELECT   rp.part_code AS \"Part Code\",  rp.part_desc AS \"Part Description\",  ROUND(SUM(rp.part_quantity), 1) AS \"Total Count\",  ROUND(SUM(rp.partamount), 1) AS \"Total Value\"FROM   MH_RO_PARTS rpJOIN   MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skWHERE   LOWER(rhd.serv_catgry_desc) = LOWER('Accessories')  AND LOWER(rhd.service_group) = LOWER('Accessories')  AND rp.oem_part_ind = 'Y'  AND rp.part_category_group = 'Spares'  AND rp.part_desc NOT LIKE '%Filter%'  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'GROUP BY   rp.part_code,  rp.part_descORDER BY   SUM(rp.part_quantity) DESCLIMIT 10;"
     },
     {
-        "input": "average rating of employee performance reviews",
-        "query": "SELECT AVG(rating) as average_rating FROM lz_performance_reviews",
-        "contexts": " | ".join([
-            "Table: lz_performance_reviews",
-            "Columns: review_id, employee_id, rating",
-            "Description: This table contains employee performance evaluations, allowing the calculation of the average rating."
-        ])
-    },
-    {
-        "input": "list employees who completed training",
-        "query": "SELECT employee_id, program_id, completion_date FROM lz_employee_training WHERE completion_date IS NOT NULL",
-        "contexts": " | ".join([
-            "Table: lz_employee_training",
-            "Columns: employee_id, program_id, completion_date",
-            "Description: This table tracks employee training completion, including employee ID, program ID, and completion date."
-        ])
-    },
-    {
-        "input": "list training programs and their durations",
-        "query": "SELECT program_name, duration FROM lz_training_programs",
-        "contexts": " | ".join([
-            "Table: lz_training_programs",
-            "Columns: program_id, program_name, duration",
-            "Description: This table contains details of training programs offered by the organization, including program names and durations."
-        ])
-    },
-    {
-        "input": "list employees along with their performance reviews",
-        "query": "SELECT e.employee_name, p.rating, p.goals_met FROM lz_employees e JOIN lz_performance_reviews p ON e.employee_id = p.employee_id",
-        "contexts": " | ".join([
-            "Tables: lz_employees, lz_performance_reviews",
-            "Columns: employee_id, employee_name, rating, goals_met",
-            "Description: This query retrieves employees along with their performance review ratings and goals met."
-        ])
-    },
-    {
-        "input": "average salary of employees",
-        "query": "SELECT AVG(salary) as average_salary FROM lz_employees",
-        "contexts": " | ".join([
-            "Table: lz_doctors",
-            "Columns: doctor_id, first_name, department_id",
-            "Description: This table includes employee details like ID, name, department, and salary, allowing for the calculation of the average salary."
-        ])
-    },
-    {
-        "input": "total revenue from sales",
-        "query": "SELECT SUM(total_amount) as total_revenue FROM lz_receipts",
-        "contexts": " | ".join([
-            "Table: lz_receipts",
-            "Columns: receipt_id, invoice_id, payment_amount, payment_date",
-            "Description: This table records financial transactions, including receipt ID, invoice ID, payment amount, and date."
-        ])
-    },
-    {
-        "input": "number of items in stock",
-        "query": "SELECT SUM(onhand_quantity) AS total_items_in_stock FROM lz_item_onhand",
-        "contexts": " | ".join([
-            "Table: lz_item_onhand",
-            "Columns: item_id, onhand_quantity, location_id",
-            "Description: This table contains inventory data, including item ID, quantity on hand, and location."
-        ])
-    },
-    {
-        "input": "number of radiology exams conducted in the last month",
-        "query": "SELECT COUNT(*) as exams_last_month FROM lz_radiology_exams WHERE exam_date >= NOW() - INTERVAL '1 month'",
-        "contexts": " | ".join([
-            "Table: lz_radiology_exams",
-            "Columns: exam_id, patient_id, exam_date, exam_type",
-            "Description: This table tracks radiology exams, including exam ID, patient ID, exam date, and type of exam."
-        ])
-    },
-    {
-        "input": "List all invoices with their corresponding receipts",
-        "query": "SELECT i.invoiceid, i.customerid, i.invoicedate, i.duedate, i.totalamount, r.receiptid, r.paymentamount FROM lz_invoices i LEFT JOIN lz_receipts r ON i.invoiceid = r.invoiceid",
-        "contexts": " | ".join([
-            "Table: lz_invoices, lz_receipts",
-            "Columns: invoice_id, customer_id, invoice_date, due_date, total_amount, receipt_id, payment_amount",
-            "Description: The `lz_invoices` table contains invoice data, including customer ID, invoice date, due date, and total amount. The `lz_receipts` table contains payment records linked to invoices."
-        ])
-    },
-    {
-        "input": "list of doctors by department",
-        "query": "SELECT department_id, doctor_name FROM lz_doctors ORDER BY department_id, doctor_name",
-        "contexts": " | ".join([
-            "Table: lz_employees",
-            "Columns: employee_id, first_name, department_id",
-            "Description: This table contains information about doctors, including their ID, name, and department."
-        ])
-    },
-    {
-        "input": "Get total amount invoiced and total amount paid for each customer",
-        "query": "SELECT i.customerid, SUM(i.totalamount) AS total_amount_invoiced, COALESCE(SUM(r.paymentamount), 0) AS total_amount_paid FROM lz_invoices i LEFT JOIN lz_receipts r ON i.invoiceid = r.invoiceid GROUP BY i.customerid",
-        "contexts": " | ".join([
-            "Table: lz_invoices, lz_receipts",
-            "Columns: invoice_id, customer_id, total_amount, payment_amount",
-            "Description: The `lz_invoices` table stores invoice details like customer ID, total amount invoiced. The `lz_receipts` table tracks payments made for these invoices."
-        ])
-    },
-    {
-    "input": "list all item costs effective after a certain date",
-    "query": "SELECT * FROM lz_item_costs WHERE effective_date > '2024-01-01'",
-    "contexts": " | ".join([
-        "Table: lz_item_costs",
-        "Columns: cost_id, item_id, cost_amount, effective_date",
-        "Description: This table contains details of item costs, allowing filtering by effective date."
-    ])
-}, 
-    {
-    "input": "get average item cost amount",
-    "query": "SELECT AVG(cost_amount) AS average_cost FROM lz_item_costs",
-    "contexts": " | ".join([
-        "Table: lz_item_costs",
-        "Columns: average_cost",
-        "Description: This table provides cost information, including the average cost amount across all items."
-    ])
-},
-    {
-    "input": "list item costs with effective dates",
-    "query": "SELECT item_id, cost_amount, effective_date FROM lz_item_costs",
-    "contexts": " | ".join([
-        "Table: lz_item_costs",
-        "Columns: item_id, cost_amount, effective_date",
-        "Description: This table tracks the costs of items, along with their effective dates."
-    ])
-},
-    {
-    "input": "list item costs by cost type",
-    "query": "SELECT cost_type, COUNT(*) AS cost_count FROM lz_item_costs GROUP BY cost_type",
-    "contexts": " | ".join([
-        "Table: lz_item_costs",
-        "Columns: cost_type, cost_count",
-        "Description: This table tracks the different types of costs associated with items, including the count of each cost type."
-    ])
-},
-    {
-        "input": "List all receipts along with the corresponding invoice details",
-        "query": """
-            SELECT r.receipt_id, r.payment_amount, i.invoice_id, i.total_amount as invoice_amount
-            FROM lz_receipts r
-            JOIN lz_invoices i ON r.invoice_id = i.invoice_id
-        """,
-        "contexts": " | ".join([
-            "Table: lz_receipts, lz_invoices",
-            "Columns: receipt_id, payment_amount, invoice_id, total_amount",
-            "Description: The `lz_receipts` table records payment details linked to invoices stored in the `lz_invoices` table."
-        ])
-    },
-    {
-        "input": "List all nurses along with their department names",
-        "query": """
-            SELECT n.nurse_id, n.nurse_name, d.department_name
-            FROM lz_nurses n
-            JOIN lz_departments d ON n.department_id = d.department_id
-        """,
-        "contexts": " | ".join([
-            "Table: lz_nurses, lz_departments",
-            "Columns: nurse_id, nurse_name, department_id, department_name",
-            "Description: The `lz_nurses` table contains information about nurses, while the `lz_departments` table includes department details."
-        ])
-    },
-    {
-        "input": "total revenue by customer",
-        "query": "SELECT customerid, SUM(totalamount) AS total_revenue FROM lz_invoices GROUP BY customerid",
-        "contexts": " | ".join([
-            "Table: lz_invoices",
-            "Columns: customer_id, total_amount",
-            "Description: This table records invoice data, including customer ID and the total amount billed."
-        ])
-    },
-    {
-        "input": "list all the invoices in the second financial quarter of 2024",
-        "query": "SELECT * FROM lz_invoices WHERE EXTRACT(QUARTER FROM invoicedate) = 2 AND EXTRACT(YEAR FROM invoicedate) = 2024",
-        "contexts": " | ".join([
-            "Table: lz_invoices",
-            "Columns: invoice_id, invoice_date, total_amount",
-            "Description: This table stores invoice details, including invoice ID, date, and total amount, allowing filtering by quarter and year."
-        ])
-    },
-    {
-        "input": "Find receipts without corresponding invoices",
-        "query": "SELECT r.receiptid, r.invoiceid, r.receiptdate, r.paymentamount, r.paymentmethod, r.paymentreference, r.paymentstatus FROM lz_receipts r LEFT JOIN lz_invoices i ON r.invoiceid = i.invoiceid WHERE i.invoiceid IS NULL",
-        "contexts": " | ".join([
-            "Table: lz_receipts, lz_invoices",
-            "Columns: receipt_id, invoice_id, payment_amount, payment_method, payment_status",
-            "Description: The `lz_receipts` table stores payment information, while the `lz_invoices` table contains invoice details, enabling the identification of receipts without matching invoices."
-        ])
-    },
-    {
-        "input": "List all employees along with their department names",
-        "query": """
-            SELECT e.employee_id, e.employee_name, d.department_name
-            FROM lz_employees e
-            JOIN lz_departments d ON e.department_id = d.department_id
-        """,
-        "contexts": " | ".join([
-            "Table: lz_employees, lz_departments",
-            "Columns: employee_id, employee_name, department_id, department_name",
-            "Description: The `lz_employees` table contains information about employees, while the `lz_departments` table includes department details."
-        ])
+        "input": "Generate a SQL query to retrieve the list of Top 10 consumed OEM parts under the \"Bodyshop\" category for the period from 01-Jan-2024 to 31-Dec-2024.",
+        "query": "SELECT   rp.part_code AS \"Part Code\",  rp.part_desc AS \"Part Description\",  ROUND(SUM(rp.part_quantity), 1) AS \"Total Count\",  ROUND(SUM(rp.partamount), 1) AS \"Total Value\"FROM MH_RO_PARTS rpJOIN MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skWHERE LOWER(rhd.serv_catgry_desc) = LOWER('Bodyshop')  AND LOWER(rhd.service_group) = LOWER('Bodyshop')  AND rp.oem_part_ind = 'Y'  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'GROUP BY rp.part_code, rp.part_descORDER BY \"Total Value\" DESCLIMIT 10;"
     }
-
 ]
+    
+
+
 
 
 
@@ -278,3 +62,7 @@ def get_example_selector():
 
     return example_selector
 
+# selector = get_example_selector()
+# user_query = "Show me top OEM parts for Charging in 2024"
+# best_example = selector.select_examples({"input": user_query})
+# print(best_example[0]["query"])  # Returns the closest SQL query
