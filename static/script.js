@@ -913,21 +913,33 @@ function closeinterpromptPopup() {
     document.getElementById("interp-prompt-popup").style.display = "none";
 }
 
-    // Add event listeners for radio buttons
-        document.querySelectorAll('input[name="questionType"]').forEach(radio => {
-            radio.addEventListener('change', async (event) => {
-                const selectedValue = event.target.value;
 
-                // Send selected option to backend
-                await fetch('/set-question-type', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ question_type: selectedValue })
-                });
+// to handle the radio button for generic and usecasebased question
 
-                // Optionally handle a response or update UI
-                console.log(`Sent question type: ${selectedValue}`);
-            });
-        });
+// Function to handle question type change
+function handleQuestionTypeChange(event) {
+    const questionType = event.target.value;
+    console.log("Selected question type:", questionType);
+
+    // Send selected option to backend
+    fetch('/set-question-type', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question_type: questionType })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Optionally handle response or update UI
+        console.log("Backend response:", data);
+    })
+    .catch(error => {
+        console.error("Error sending question type:", error);
+    });
+}
+
+// Attach event listeners to all radio buttons with name="questionType"
+document.querySelectorAll('input[name="questionType"]').forEach(radio => {
+    radio.addEventListener('change', handleQuestionTypeChange);
+});

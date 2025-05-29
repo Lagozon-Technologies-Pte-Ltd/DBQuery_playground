@@ -34,7 +34,7 @@
                 <img src="static/reset.png" alt="Reset Session" class="reset-icon" onclick="resetSession()"
                     style="cursor: pointer; margin-left: 10px; width: 24px; height: 24px;">
             </h2>
-            
+
             <!-- Added radio buttons here -->
             <div style="display: flex; gap: 20px; margin-bottom: 10px;">
                 <label style="display: flex; align-items: center; gap: 6px;">
@@ -46,9 +46,11 @@
                     Usecase-Based Question
                 </label>
             </div>
-            
-            <p id="connection-status" style="color: green; font-weight: 100; padding-left: 0; font-size: 20px; margin-top: 0;">Select a database to connect</p>
-            
+
+            <p id="connection-status"
+                style="color: green; font-weight: 100; padding-left: 0; font-size: 20px; margin-top: 0;">Select a
+                database to connect</p>
+
             <div id="unified-input-container">
                 <select name="database" id="database-dropdown" onchange="connectToDatabase(this.value);" required>
                     <option value="" disabled selected>Select Database</option>
@@ -56,7 +58,7 @@
                     <option value="{{ db }}">{{ db }}</option>
                     {% endfor %}
                 </select>
-                
+
                 <select name="section" id="section-dropdown" onchange="fetchQuestions(this.value);" required disabled>
                     <option value="" disabled selected>Select Subject</option>
                     <!-- Will be populated by JavaScript -->
@@ -200,6 +202,7 @@
         </div>
     </main>
     <script src="static/script.js"></script>
-    
+
 </body>
+
 </html>

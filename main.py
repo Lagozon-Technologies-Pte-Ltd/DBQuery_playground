@@ -506,7 +506,7 @@ async def get_questions(subject: str):
         )
 # Function to load prompts from YAML
 
-def load_prompts():
+def load_prompts(filename:str):
     """
     Loads prompts from the chatbot_prompt.yaml file.
 
@@ -514,14 +514,12 @@ def load_prompts():
         dict: A dictionary containing the loaded prompts.
     """
     try:
-        with open("chatbot_prompt.yaml", "r", encoding="utf-8") as file:
+        with open(filename, "r", encoding="utf-8") as file:
             return yaml.safe_load(file)
     except Exception as e:
         print(f"Error reading prompts file: {e}")
         return {}
 
-# Load prompts at startup
-PROMPTS = load_prompts()
 @app.post("/submit_feedback/")
 @app.post("/submit_feedback")
 async def submit_feedback(request: Request):
@@ -898,3 +896,20 @@ async def get_table_data(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating table data: {str(e)}")
+
+current_question_type = "generic"
+
+class QuestionTypeRequest(BaseModel):
+    question_type: str
+@app.post("/set-question-type")
+async def set_question_type(payload: QuestionTypeRequest):
+    global current_question_type
+    current_question_type = payload.question_type
+
+    filename = "generic_prompt.yaml" if current_question_type == "generic" else "chatbot_prompt.yaml"
+    prompts = load_prompts(filename)
+
+    print("Received question type:", current_question_type)
+    print("Loaded prompts:", prompts)
+
+    return JSONResponse(content={"message": "Question type set", "prompts": prompts})
