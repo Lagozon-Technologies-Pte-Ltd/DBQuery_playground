@@ -8,7 +8,7 @@ unified_prompt: |
 
   Instructions:
   - Return only a JSON object with the following keys:
-    - "rephrased_query": A single concise, SQL-ready sentence representing the user’s intent with full context.
+    - "rephrased_query": A concise, SQL-ready sentence representing the user’s intent with full context.
     - "tables_chosen": A list of relevant table names from the metadata.
 
   - Rephrasing Guidelines:
