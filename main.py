@@ -701,8 +701,8 @@ async def submit_query(
     logger.info(f"Chat history: {chat_history}")
     try:
        # **Step 1: Invoke Unified Prompt**
-        prompts = getattr(request.app.state, "prompts", None)
-        current_question_type = getattr(request.app.state, "current_question_type", None)
+        prompts = getattr(request.app.state, "prompts", "None")
+        current_question_type = getattr(request.app.state, "current_question_type", "generic")
         logger.info(f"Selected query type: {current_question_type}")
 
         key_parameters = get_key_parameters()
@@ -769,16 +769,18 @@ async def submit_query(
             llm_reframed_query = llm_result.get("rephrased_query", "")
             chosen_tables = llm_result.get("tables_chosen", [])
             selected_business_rule = ""
+            
 
        
         
         
-        
+        relationships = find_relationships_for_tables(chosen_tables , 'table_relation.json')
+        print("simran", relationships)
         table_details = get_table_details(selected_subject=selected_subject,table_name=chosen_tables)
         response, chosen_tables, tables_data, agent_executor, final_prompt = invoke_chain(
                 llm_reframed_query, session_state['messages'], model,
                 selected_subject, selected_database, table_details,
-                selected_business_rule, current_question_type
+                selected_business_rule, current_question_type, relationships
             )
         logger.info(f"Intent table: {chosen_tables}")
         logger.info(f"table details: {table_details}")

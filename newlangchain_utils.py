@@ -281,7 +281,7 @@ def get_sql_db(selected_subject, mahindra_tables):
 
 
 
-def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule,question_type):
+def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule,question_type,relationships):
     if selected_database == 'GCP':
         prompt_file = "GCP_prompt.txt"
     else:
@@ -310,9 +310,18 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
     )
     business_glossary = get_business_glossary_text()
     if question_type == "generic":
+        formatted_relationships = []
+        for table, rels in relationships.items():
+            for rel in rels:
+                formatted_relationships.append(
+                    f"• {rel['source']}.{rel['source_key']} → {rel['target']}.{rel['target_key']} "
+                    f"({rel['type'].replace('_',' ').title()})"
+                )
+        relationships_str = "\n".join(formatted_relationships) or "No relationships found"
+
         final_prompt1 = ChatPromptTemplate.from_messages(
             [
-                ("system", static_prompt.format(table_info=table_details,  Business_Glossary = business_glossary)),
+                ("system", static_prompt.format(table_info=table_details,  Business_Glossary = business_glossary,relationships=relationships_str)),
                 few_shot_prompt,
                 MessagesPlaceholder(variable_name="messages"),
                 ("human", "{input}"),
@@ -365,14 +374,14 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
 
 
 
-def invoke_chain(question, messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule,question_type):
+def invoke_chain(question, messages, selected_model, selected_subject, selected_database, table_info,selected_business_rule,question_type,relationships):
     print(question, messages, selected_model, selected_subject, selected_database)
     try:
         print('Model used:', selected_model)
         history = create_history(messages)
         chain, SQL_Statement, db, final_prompt = get_chain(
             question, history.messages, selected_model, selected_subject,
-            selected_database, table_info, selected_business_rule, question_type
+            selected_database, table_info, selected_business_rule, question_type, relationships
         )
         print(f"Generated SQL Statement in newlangchain_utils: {SQL_Statement}")
         SQL_Statement = SQL_Statement.replace("SQL Query:", "").strip()
@@ -529,3 +538,16 @@ def get_example_selector(json_file_path: str):
     )
     
     return example_selector
+
+def find_relationships_for_tables(table_names, json_file_path):
+    # Load the JSON
+    with open(json_file_path, 'r') as f:
+        relations_data = json.load(f)
+    all_related = {}
+    for table_name in table_names:
+        related = []
+        for rel in relations_data["relations"]:
+            if rel.get("source") == table_name or rel.get("target") == table_name:
+                related.append(rel)
+        all_related[table_name] = related
+    return all_related

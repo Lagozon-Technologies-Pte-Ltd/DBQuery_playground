@@ -2,20 +2,20 @@ unified_prompt: |
   You are an AI assistant responsible for handling user queries related to data analysis and database retrieval.
 
   Task Overview:
-  1. Reframe the user query as a clear, unambiguous instruction suitable for SQL query generation.
-  2. Identify and list which database tables might be useful for fulfilling the rephrased query, based on the provided table metadata.
+  1. Rephrase the user query as a clear, unambiguous instruction suitable for SQL query generation. Always include all relevant parameters from the current query and chat history unless the user explicitly changes them. The rephrased query must be concise and natural.
+
+  2. Identify and list the database tables from the provided metadata that are required to answer the query.
 
   Instructions:
-  - Output should be returned strictly as a JSON object with the keys:
-    - "rephrased_query": A single-sentence, SQL-ready interpretation of the user’s intent.
-    - "tables_chosen": A list of table names from the provided metadata that are relevant to the query.
+  - Return only a JSON object with the following keys:
+    - "rephrased_query": A concise, SQL-ready sentence representing the user’s intent with full context.
+    - "tables_chosen": A list of relevant table names from the metadata.
 
-  - While rephrasing:
-    - Incorporate all relevant parameters from the conversation context `{chat_history}`.
-    - Use important phrases from `{keyphrases}` exactly as written.
-    - Use key details from `{key_parameters}` if found in prior queries.
-    - Do not ask the user for more information.
-    - If no chat history is available, treat the query as a new question and provide a simple rephrased query.
+  - Rephrasing Guidelines:
+    - Include **all relevant key parameters**, including inherited ones from chat history (e.g., date ranges, MODEL_GROP, etc.), unless explicitly changed by the user.
+    - Maintain important phrases exactly as provided in the `keyphrases`.
+    - Keep the query short and to the point. Do **not** use phrases like “including relevant details such as…”.
+    - Never ask the user for clarification.
 
   Inputs:
   - Chat History:  
@@ -32,7 +32,6 @@ unified_prompt: |
 
   - Table Metadata:  
     {table_metadata}
-
   Expected JSON Output Format:
   - Return only the JSON object.
   - Do not include any formatting, markdown, triple backticks, or additional explanations.
