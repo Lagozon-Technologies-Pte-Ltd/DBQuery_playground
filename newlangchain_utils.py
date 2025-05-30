@@ -66,6 +66,22 @@ db_port=os.getenv("db_port")
 db_schema= os.getenv("db_schema")
 mahindra_tables =  json.loads(os.getenv("mahindra_tables"))
 
+
+SQL_DB_SERVER = os.getenv("SQL_DB_SERVER")
+SQL_DB_PORT = os.getenv("SQL_DB_PORT")
+SQL_DB_NAME = os.getenv("SQL_DB_NAME")
+SQL_DB_USER = os.getenv("SQL_DB_USER")
+SQL_DB_PASSWORD = os.getenv("SQL_DB_PASSWORD")
+SQL_DB_DRIVER = os.getenv("SQL_DB_DRIVER").replace(" ", "+")  # URL encode spaces
+SQL_POOL_SIZE = int(os.getenv("SQL_POOL_SIZE", 5))
+SQL_MAX_OVERFLOW = int(os.getenv("SQL_MAX_OVERFLOW", 10))
+
+SQL_DATABASE_URL = (
+    f"mssql+pyodbc://{SQL_DB_USER}:{SQL_DB_PASSWORD}@{SQL_DB_SERVER}:{SQL_DB_PORT}/{SQL_DB_NAME}"
+    f"?driver={SQL_DB_DRIVER}"
+)
+
+
 from sqlalchemy.exc import SQLAlchemyError
 def insert_feedback(department, user_query, sql_query, table_name, data, feedback_type="user not reacted", feedback="user not given feedback"):
     engine = create_engine(f'postgresql+psycopg2://{quote_plus(db_user)}:{quote_plus(db_password)}@{db_host}:{db_port}/{db_database}')
@@ -120,6 +136,7 @@ def save_votes(table_name, votes):
         raise e  # Propagate the exception
     finally:
         session.close()
+# Create the connection string
 
 def load_votes(table_name):
     engine = create_engine(f'postgresql+psycopg2://{quote_plus(db_user)}:{quote_plus(db_password)}@{db_host}:{db_port}/{db_database}')
@@ -232,19 +249,37 @@ class BigQuerySQLDatabase(SQLDatabase):
                 schema_info += f"Error getting schema for table {table_name}: {e}\n"
 
         return schema_info
-db = BigQuerySQLDatabase()
 
-# table_info = db.get_table_info()
-# #Save table_info to a text file
-# with open("table_info.txt", "w") as file:
-#     file.write(str(table_info))
 
-# print("Table info saved successfully to table_info.txt")
-# @cache_resource
+
+# Connection for new AZURE SQL (code logic of Simran)
+def get_sql_db(selected_subject, mahindra_tables):
+    print("connected to newer azure SQL DB.")
+    try:
+        engine = create_engine(
+            SQL_DATABASE_URL,
+            pool_size=SQL_POOL_SIZE,
+            max_overflow=SQL_MAX_OVERFLOW,
+            echo=True  # Set to False in production
+        )
+
+        print("Connection successful")
+
+        # Wrap the engine in a LangChain SQLDatabase object
+        db = SQLDatabase(engine)
+        return db
+
+    except SQLAlchemyError as e:
+        print(f"Error connecting to the database: {e}")
+        return None
+
+
+
+
 def get_chain(question, _messages, selected_model, selected_subject, selected_database, table_details, selected_business_rule,question_type):
     if selected_database == 'GCP':
         prompt_file = "GCP_prompt.txt"
-    elif selected_database == 'PostgreSQL-Azure':
+    else:
         prompt_file = "Generic_postgres_prompt.txt" if question_type == "generic" else "Postgres_prompt.txt"
     
     
@@ -291,9 +326,10 @@ def get_chain(question, _messages, selected_model, selected_subject, selected_da
     print("langchain prompt: ", final_prompt)
     if selected_database=="GCP":
             db = BigQuerySQLDatabase()
-    else:
-     
+    elif selected_database=="PostgreSQL-Azure":
         db = get_postgres_db(selected_subject, mahindra_tables)
+    elif selected_database=="Azure SQL":
+        db = get_sql_db(selected_subject, mahindra_tables)
     print("start",selected_database)
     print("Generate Query Starting")
 

@@ -110,7 +110,7 @@ class ChartRequest(BaseModel):
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
-databases = ["GCP", "PostgreSQL-Azure"]
+databases = ["GCP", "PostgreSQL-Azure", "Azure SQL"]
 question_dropdown = os.getenv('Question_dropdown')
 llm = ChatOpenAI(model=gpt_model, temperature=0)  # Adjust model as necessary
 if 'messages' not in session_state:

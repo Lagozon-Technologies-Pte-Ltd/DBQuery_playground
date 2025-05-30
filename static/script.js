@@ -210,7 +210,13 @@ function connectToDatabase(selectedDatabase) {
         sections = [
             'Mah-POC-Azure'
         ]; // Directly specify PostgreSQL sections
-    } else {
+    } 
+    else if (selectedDatabase == 'Azure SQL') {
+        sections = [
+            'Azure-SQL-DB'
+        ]; // Directly specify PostgreSQL sections
+    }
+    else {
         console.error('Unknown database selected:', selectedDatabase);
         return;
     }
