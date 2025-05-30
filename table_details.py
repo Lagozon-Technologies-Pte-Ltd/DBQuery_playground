@@ -1,5 +1,5 @@
 import pandas as pd
-import os
+import os, json
 import configure
 from operator import itemgetter
 from langchain.chains.openai_tools import create_extraction_chain_pydantic 
@@ -90,28 +90,32 @@ def get_tables(tables: List[Table]) -> List[str]:
 
 def get_table_metadata(selected_subject='Demo'):
     """
-    Returns a list of table names and their descriptions from a subject-specific CSV file.
-    - selected_subject: base name of CSV file (without .csv)
+    Returns a list of table names and their descriptions from a subject-specific JSON file.
+    - selected_subject: base name of JSON file (without .json)
     """
-    path = f'table_files/{selected_subject}.csv'
+    path = f'tables_details.json'
     
     try:
-        table_description = pd.read_csv(path)
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
     except FileNotFoundError:
         return f"File not found: {path}"
     except Exception as e:
         return f"Error reading file: {e}"
 
-    if 'table_name' not in table_description.columns or 'table_description' not in table_description.columns:
-        return "CSV must contain 'table_name' and 'table_description' columns."
+    if 'tables' not in data or not isinstance(data['tables'], list):
+        return "JSON must contain a 'tables' list."
 
-    # Drop duplicates and sort
-    unique_tables = table_description[['table_name', 'table_description']].drop_duplicates().sort_values('table_name')
-
-    # Convert to formatted string
     table_info = ""
-    for _, row in unique_tables.iterrows():
-        table_info += f"Table Name: {row['table_name']}\nDescription: {row['table_description']}\n\n"
+    seen = set()
+    for table in data['tables']:
+        table_name = table.get('table_name')
+        table_description = table.get('table_description')
+        if not table_name or not table_description:
+            continue
+        if table_name not in seen:
+            seen.add(table_name)
+            table_info += f"Table Name: {table_name}\nDescription: {table_description}\n\n"
 
     return table_info.strip()
 # table_names = "\n".join(db.get_usable_table_names())

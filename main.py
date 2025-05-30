@@ -624,8 +624,8 @@ async def submit_query(
     logger.info(f"Chat history: {chat_history}")
     try:
        # **Step 1: Invoke Unified Prompt**
-        prompts = getattr(request.app.state, "prompts", None)
-        current_question_type = getattr(request.app.state, "current_question_type", None)
+        prompts = getattr(request.app.state, "prompts", "None")
+        current_question_type = getattr(request.app.state, "current_question_type", "generic")
         logger.info(f"Selected query type: {current_question_type}")
 
         key_parameters = get_key_parameters()
