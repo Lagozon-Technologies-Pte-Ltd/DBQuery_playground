@@ -269,9 +269,12 @@ async def add_to_faqs(data: QueryInput):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 def generate_chart_figure(data_df: pd.DataFrame, x_axis: str, y_axis: str, chart_type: str):
     """
     Generates a Plotly figure based on the specified chart type.
+    Includes support for Word Cloud visualization.
 
     Args:
         data_df (pd.DataFrame): The DataFrame containing the data.
@@ -283,32 +286,62 @@ def generate_chart_figure(data_df: pd.DataFrame, x_axis: str, y_axis: str, chart
         plotly.graph_objects.Figure: A Plotly figure, or None if the chart type is unsupported.
     """
     fig = None
-    if chart_type == "Line Chart":
-        fig = px.line(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Bar Chart":
-        fig = px.bar(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Scatter Plot":
-        fig = px.scatter(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Pie Chart":
-        fig = px.pie(data_df, names=x_axis, values=y_axis)
-    elif chart_type == "Histogram":
-        fig = px.histogram(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Box Plot":
-        fig = px.box(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Heatmap":
-        fig = px.density_heatmap(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Violin Plot":
-        fig = px.violin(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Area Chart":
-        fig = px.area(data_df, x=x_axis, y=y_axis)
-    elif chart_type == "Funnel Chart":
-        fig = px.funnel(data_df, x=x_axis, y=y_axis)
-    return fig
+    try:
+        if chart_type == "Line Chart":
+            fig = px.line(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Bar Chart":
+            fig = px.bar(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Scatter Plot":
+            fig = px.scatter(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Pie Chart":
+            fig = px.pie(data_df, names=x_axis, values=y_axis)
+        elif chart_type == "Histogram":
+            fig = px.histogram(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Box Plot":
+            fig = px.box(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Heatmap":
+            fig = px.density_heatmap(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Violin Plot":
+            fig = px.violin(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Area Chart":
+            fig = px.area(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Funnel Chart":
+            fig = px.funnel(data_df, x=x_axis, y=y_axis)
+        elif chart_type == "Word Cloud":
+            # For Word Cloud, we only need text data from x_axis column
+            text_data = data_df[x_axis].dropna().astype(str).tolist()
+            text = ' '.join(text_data)
+            
+            # Generate word cloud
+            wordcloud = WordCloud(width=800, height=400, 
+                                background_color='white',
+                                max_words=200).generate(text)
+            
+            # Convert to Plotly figure
+            fig = px.imshow(wordcloud.to_array())
+            fig.update_layout(
+                
+                xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+            
+        return fig
+    except Exception as e:
+        print(f"Error generating {chart_type} chart: {str(e)}")
+        raise
 
-@app.post("/generate-chart/")
+class ChartRequest(BaseModel):
+    table_name: str
+    x_axis: str
+    y_axis: str
+    chart_type: str
+
+@app.post("/generate-chart")
 async def generate_chart(request: ChartRequest):
     """
     Generates a chart based on the provided request data.
+    Handles both numeric charts and text-based Word Cloud.
     """
     try:
         table_name = request.table_name
@@ -318,111 +351,79 @@ async def generate_chart(request: ChartRequest):
 
         print(f"Received Request: {request.dict()}")
 
+        # Validate table exists
         if "tables_data" not in session_state or table_name not in session_state["tables_data"]:
-            return JSONResponse(
-                content={"error": f"No data found for table {table_name}"},
-                status_code=404
-            )
+            raise HTTPException(status_code=404, detail=f"No data found for table {table_name}")
 
         data_df = session_state["tables_data"][table_name]
-        print(f"Table {table_name} data: {data_df.head()}")  # Print first few rows of the DataFrame
-        print(f"X-axis data type: {data_df[x_axis].dtype}")
-        print(f"Y-axis data type: {data_df[y_axis].dtype}")
+        
+        # Validate columns exist
+        if x_axis not in data_df.columns:
+            raise HTTPException(status_code=400, detail=f"Column '{x_axis}' not found in data")
+            
+        # Skip y_axis validation for Word Cloud
+        if chart_type != "Word Cloud" and y_axis not in data_df.columns:
+            raise HTTPException(status_code=400, detail=f"Column '{y_axis}' not found in data")
 
-        # Explicit type conversion (example)
-        try:
-            data_df[y_axis] = pd.to_numeric(data_df[y_axis], errors='coerce')
-            data_df = data_df.dropna(subset=[y_axis])
-        except Exception as e:
-            print(f"Error converting data to numeric: {e}")
-            return JSONResponse(
-                content={"error": f"Error converting data to numeric: {str(e)}"},
-                status_code=400
-            )
-
-        print(f"Generating {chart_type} for Table: {table_name}, X: {x_axis}, Y: {y_axis}")
-
-        fig = generate_chart_figure(data_df, x_axis, y_axis, chart_type)
-
-        if fig:
-            chart_json = fig.to_json()
-            #print(chart_json) # consider limiting this output as it can be very large
-            return JSONResponse(content={"chart": chart_json})
+        # Data processing based on chart type
+        if chart_type == "Word Cloud":
+            # Ensure we have text data for word cloud
+            if not pd.api.types.is_string_dtype(data_df[x_axis]):
+                data_df[x_axis] = data_df[x_axis].astype(str)
         else:
-            return JSONResponse(content={"error": "Unsupported chart type selected."}, status_code=400)
+            # For other charts, convert y-axis to numeric
+            try:
+                data_df[y_axis] = pd.to_numeric(data_df[y_axis], errors='coerce')
+                data_df = data_df.dropna(subset=[y_axis])
+                if len(data_df) == 0:
+                    raise ValueError("No valid numeric data available after conversion")
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Error processing numeric data: {str(e)}")
 
+        # Generate the chart
+        fig = generate_chart_figure(data_df, x_axis, y_axis, chart_type)
+        
+        if fig is None:
+            raise HTTPException(status_code=400, detail="Unsupported chart type selected")
+            
+        return JSONResponse(content={"chart": fig.to_json()})
+
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        import traceback
-        print(traceback.format_exc())
-        print(f"Chart generation error: {e}")
-        return JSONResponse(
-            content={"error": f"An error occurred while generating the chart: {str(e)}"},
-            status_code=500
-        )
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 @app.get("/download-table/")
 @app.get("/download-table")
 async def download_table(table_name: str):
     """
-    Downloads a table as a ZIP file containing the Excel, word cloud image, and word frequency Excel.
+    Downloads a table as an Excel file.
 
     Args:
         table_name (str): The name of the table to download.
 
     Returns:
-        StreamingResponse: A zip file containing the Excel file, word cloud, and frequency Excel.
+        StreamingResponse: A streaming response containing the Excel file.
     """
-    # Validate table
+    # Check if the requested table exists in session state
     if "tables_data" not in session_state or table_name not in session_state["tables_data"]:
         raise HTTPException(status_code=404, detail=f"Table {table_name} data not found.")
 
-    # Retrieve DataFrame
-    data: pd.DataFrame = session_state["tables_data"][table_name]
+    # Get the table data from session_state
+    data = session_state["tables_data"][table_name]
 
-    # Step 1: Generate Excel in memory
-    excel_buffer = BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-        data.to_excel(writer, index=False, sheet_name='Sheet1')
-    excel_buffer.seek(0)
+    # Generate Excel file
+    output = download_as_excel(data, filename=f"{table_name}.xlsx")
 
-    # Step 2: Generate word cloud and word frequency Excel
-    frequency_buffer = BytesIO()
-    image_path = None
-
-    if 'demanded_verbatim' in data.columns:
-        data['processed_text'] = data['demanded_verbatim'].apply(lambda x: awa.process_text(str(x)))
-        all_text = ' '.join(data['processed_text'])
-
-        # Generate word cloud
-        awa.generate_wordcloud(all_text)
-        image_path = os.path.join("static", awa.OUTPUT_IMAGE)
-
-        # Analyze frequency and write to Excel in-memory
-        freq = awa.analyze_frequencies(all_text)
-        freq_df = pd.DataFrame(freq.most_common(), columns=['Component/Word', 'Count'])
-        with pd.ExcelWriter(frequency_buffer, engine='xlsxwriter') as writer:
-            freq_df.to_excel(writer, index=False, sheet_name='WordFrequency')
-        frequency_buffer.seek(0)
-
-    # Step 3: Package all into ZIP
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zf:
-        zf.writestr(f"{table_name}.xlsx", excel_buffer.getvalue())
-        if image_path and os.path.exists(image_path):
-            with open(image_path, "rb") as img_file:
-                zf.writestr("wordcloud.png", img_file.read())
-        if frequency_buffer.getbuffer().nbytes > 0:
-            zf.writestr("word_frequency_analysis.xlsx", frequency_buffer.getvalue())
-
-    zip_buffer.seek(0)
-
-    return StreamingResponse(
-        zip_buffer,
-        media_type="application/x-zip-compressed",
-        headers={
-            "Content-Disposition": f"attachment; filename={table_name}_report.zip"
-        }
+    # Return the Excel file as a streaming response
+    response = StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+    response.headers["Content-Disposition"] = f"attachment; filename={table_name}.xlsx"
+    return response
+
 
 # Replace APIRouter with direct app.post
 def format_number(x):
