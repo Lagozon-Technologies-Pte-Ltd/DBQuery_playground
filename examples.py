@@ -1,89 +1,40 @@
-# examples = [
-#     {
-#         "input": "Generate a word cloud for the MODEL Group description \"BOLERO\" based on data from 01-Jan-2024 to 31-Mar-2024.",
-#         "query": "SELECT   mm.MODL_GROP_DESC AS Model_Grop,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatim,  COUNT(cv.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIM cvJOIN MH_RO_HDR_DETAILS rhd ON cv.sv_ro_hdr_sk = rhd.sv_ro_hdr_skJOIN MH_MODEL_MASTER mm ON LOWER(rhd.MODL_CD) = LOWER(mm.MODL_CD)WHERE LOWER(mm.MODL_GROP_DESC) = LOWER('BOLERO')  AND rhd.RO_BILL_DATE BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%km%'GROUP BY   mm.MODL_GROP_DESC,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatimORDER BY frequency_count DESC;"
-#     },
-#     {
-#         "input": "Generate a Word Cloud for the FAMLY_DESC \"XUV700 Diesel AT\".",
-#         "query": "SELECT   mm.MODL_GROP_DESC AS Model_Grop,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatim,  COUNT(cv.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIM cvJOIN MH_RO_HDR_DETAILS rhd ON cv.sv_ro_hdr_sk = rhd.sv_ro_hdr_skJOIN MH_MODEL_MASTER mm ON LOWER(rhd.MODL_CD) = LOWER(mm.MODL_CD)WHERE LOWER(mm.FAMLY_DESC) = LOWER('XUV700 Diesel AT')  AND (    (LOWER(rhd.SERV_CATGRY_DESC) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(rhd.service_group) = LOWER('mechanical'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('bodyshop') AND LOWER(rhd.service_group) = LOWER('accessories'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('bodyshop') AND LOWER(rhd.service_group) = LOWER('bodyshop'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('sales & service') AND LOWER(rhd.service_group) = LOWER('accessories'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = LOWER('bodyshop') AND LOWER(rhd.service_group) = LOWER('pre-sale/pdi'))  )  AND LOWER(cv.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%km%'GROUP BY   mm.MODL_GROP_DESC,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatimORDER BY frequency_count DESC;"
-#     },
-#     {
-#         "input": "Generate a Word Cloud for the Dealer \"PROVINCIAL AUTOMOBILE CO. PVT. LTD\" for the period from 01-Jan-2024 to 31-Mar-2024.",
-#         "query": "SELECT  mh_ad_ai.delr_name AS Dealer_Name,  mh_cust_verbatim.verbatim_group,  mh_cust_verbatim.verbatim_code,  mh_cust_verbatim.cust_verbtm_desc,  mh_cust_verbatim.verbatim_group_desc,  mh_cust_verbatim.demanded_verbatim,  COUNT(mh_cust_verbatim.verbatim_code) AS frequency_countFROM MH_RO_HDR_DETAILS AS mh_roJOIN MH_CUST_VERBATIM AS mh_cust_verbatim  ON mh_ro.sv_ro_hdr_sk = mh_cust_verbatim.sv_ro_hdr_skJOIN MH_AD_AI_DIMENSION AS mh_ad_ai  ON LOWER(mh_ro.parnt_grop) = LOWER(mh_ad_ai.parnt_grop)  AND LOWER(mh_ro.loctn_cd) = LOWER(mh_ad_ai.loctn_cd)  AND LOWER(mh_ro.prodct_divsn) = LOWER(mh_ad_ai.prodct_divsn)WHERE LOWER(mh_ad_ai.delr_name) = LOWER('PROVINCIAL AUTOMOBILE CO. PVT. LTD')  AND mh_ro.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND (    (LOWER(mh_ro.serv_catgry_desc) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(mh_ro.service_group) = 'mechanical')    OR (LOWER(mh_ro.serv_catgry_desc) = 'bodyshop' AND LOWER(mh_ro.service_group) IN ('accessories', 'bodyshop'))    OR (LOWER(mh_ro.serv_catgry_desc) = 'sales & service' AND LOWER(mh_ro.service_group) = 'accessories')    OR (LOWER(mh_ro.serv_catgry_desc) = 'bodyshop' AND LOWER(mh_ro.service_group) = 'pre-sale/pdi')  )  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(mh_cust_verbatim.demanded_verbatim) NOT LIKE '%km%'GROUP BY  mh_ad_ai.delr_name,  mh_cust_verbatim.verbatim_group,  mh_cust_verbatim.verbatim_code,  mh_cust_verbatim.cust_verbtm_desc,  mh_cust_verbatim.verbatim_group_desc,  mh_cust_verbatim.demanded_verbatimORDER BY frequency_count DESC;"
-#     },
-#      {
-#         "input": "Generate a Word Cloud for the Area Office \"Calcutta\" for the period from 01-Jan-2024 to 31-Mar-2024.",
-#         "query": "SELECT   mm.MODL_GROP_DESC AS Model_Grop,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatim,  COUNT(cv.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIM cvJOIN MH_RO_HDR_DETAILS rhd ON cv.sv_ro_hdr_sk = rhd.sv_ro_hdr_skJOIN MH_MODEL_MASTER mm ON LOWER(rhd.MODL_CD) = LOWER(mm.MODL_CD)JOIN MH_AD_AI_DIMENSION dim ON   LOWER(rhd.PARNT_GROP) = LOWER(dim.parnt_grop) AND  LOWER(rhd.LOCTN_CD) = LOWER(dim.loctn_cd) AND  LOWER(rhd.PRODCT_DIVSN) = LOWER(dim.prodct_divsn)WHERE   LOWER(dim.area_name) = LOWER('Calcutta')  AND rhd.RO_BILL_DATE BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND (    (LOWER(rhd.SERV_CATGRY_DESC) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(rhd.service_group) = 'mechanical')    OR (LOWER(rhd.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(rhd.service_group) IN ('accessories', 'bodyshop'))    OR (LOWER(rhd.SERV_CATGRY_DESC) = 'sales & service' AND LOWER(rhd.service_group) = 'accessories')    OR (LOWER(rhd.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(rhd.service_group) = 'pre-sale/pdi')  )  AND LOWER(cv.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(cv.demanded_verbatim) NOT LIKE '%km%'GROUP BY   mm.MODL_GROP_DESC,  cv.verbatim_group,  cv.verbatim_code,  cv.cust_verbtm_desc,  cv.verbatim_group_desc,  cv.demanded_verbatimORDER BY frequency_count DESC;"
-#     },
-#     {
-#         "input": "Generate a Word Cloud for the \"West Zone\" covering the period from 01-Jan-2024 to 31-Mar-2024.",
-#         "query": "SELECT   LOWER(MH_AD_AI_DIMENSION.zone_name) AS Dealer_Zone,  LOWER(MH_AD_AI_DIMENSION.area_name) AS Dealer_AREA_Office,  MH_CUST_VERBATIM.verbatim_group,  MH_CUST_VERBATIM.verbatim_code,  MH_CUST_VERBATIM.cust_verbtm_desc,  MH_CUST_VERBATIM.verbatim_group_desc,  MH_CUST_VERBATIM.demanded_verbatim,  COUNT(MH_CUST_VERBATIM.verbatim_code) AS frequency_countFROM MH_CUST_VERBATIMJOIN MH_RO_HDR_DETAILS ON MH_CUST_VERBATIM.sv_ro_hdr_sk = MH_RO_HDR_DETAILS.sv_ro_hdr_skJOIN MH_AD_AI_DIMENSION ON   LOWER(MH_AD_AI_DIMENSION.parnt_grop) = LOWER(MH_RO_HDR_DETAILS.parnt_grop) AND  LOWER(MH_AD_AI_DIMENSION.loctn_cd) = LOWER(MH_RO_HDR_DETAILS.loctn_cd) AND  LOWER(MH_AD_AI_DIMENSION.prodct_divsn) = LOWER(MH_RO_HDR_DETAILS.prodct_divsn)WHERE   LOWER(MH_AD_AI_DIMENSION.zone_name) = LOWER('West Zone')  AND MH_RO_HDR_DETAILS.RO_BILL_DATE BETWEEN DATE '2024-01-01' AND DATE '2024-03-31'  AND (    (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) IN ('free service', 'paid service', 'en-route repair', 'repair') AND LOWER(MH_RO_HDR_DETAILS.service_group) = 'mechanical')    OR (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(MH_RO_HDR_DETAILS.service_group) IN ('accessories', 'bodyshop'))    OR (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) = 'sales & service' AND LOWER(MH_RO_HDR_DETAILS.service_group) = 'accessories')    OR (LOWER(MH_RO_HDR_DETAILS.SERV_CATGRY_DESC) = 'bodyshop' AND LOWER(MH_RO_HDR_DETAILS.service_group) = 'pre-sale/pdi')  )  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%schedule%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%washing%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%maxicare%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%wheel alignment%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%wheel balance%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%service action%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%10000%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%1000%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%5000%'  AND LOWER(MH_CUST_VERBATIM.demanded_verbatim) NOT LIKE '%km%'GROUP BY   Dealer_Zone,  Dealer_AREA_Office,  MH_CUST_VERBATIM.verbatim_group,  MH_CUST_VERBATIM.verbatim_code,  MH_CUST_VERBATIM.cust_verbtm_desc,  MH_CUST_VERBATIM.verbatim_group_desc,  MH_CUST_VERBATIM.demanded_verbatimORDER BY frequency_count DESC;"
-#     },
- 
-#     {
-#         "input": "Provide the list of Top 10 Rama consumed OEM parts under En-Route for the period from 01-Jan-2024 to 31-Dec-2024.",
-#         "query": "SELECT   rp.part_code AS Part_Code,  rp.part_desc AS Part_Description,  ROUND(SUM(rp.part_quantity), 1) AS Total_Count,  ROUND(SUM(rp.partamount), 1) AS Total_ValueFROM MH_RO_PARTS rpJOIN MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skJOIN MH_AD_AI_DIMENSION dim ON   LOWER(dim.parnt_grop) = LOWER(rhd.parnt_grop) AND  LOWER(dim.loctn_cd) = LOWER(rhd.loctn_cd) AND  LOWER(dim.prodct_divsn) = LOWER(rhd.prodct_divsn)WHERE   LOWER(rp.oem_part_ind) = 'y'  AND rhd.serv_catgry_desc = 'En-Route'  AND rhd.service_group = 'Pre-Sale/PDI'  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'  AND LOWER(dim.zone_name) = LOWER('En-Route')  AND LOWER(rp.part_category_group) = LOWER('Spares')  AND rp.part_desc NOT ILIKE '%Filter%'GROUP BY rp.part_code, rp.part_descORDER BY Total_Value DESCLIMIT 10;"
-#     },
-#     {
-#         "input": "Retrieve the list of Top 10 consumed OEM parts under the \"Pre-Sale/PDI\" category for the period from 01-Jan-2024 to 31-Dec-2024",
-#         "query": "SELECT   rp.part_code AS \"Part Code\",  rp.part_desc AS \"Part Description\",  ROUND(SUM(rp.part_quantity), 1) AS \"Total Count\",  ROUND(SUM(rp.partamount), 1) AS \"Total Value\"FROM   MH_RO_PARTS rpJOIN   MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skWHERE   LOWER(rp.oem_part_ind) = LOWER('Y')  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'  AND (    (LOWER(rhd.serv_catgry_desc) IN (LOWER('En-Route'), LOWER('Pre-Sale/PDI')) AND LOWER(rhd.service_group) = LOWER('Pre-Sale/PDI'))  )  AND LOWER(rp.part_category_group) = LOWER('Spares')  AND rp.part_desc NOT LIKE '%Filter%'GROUP BY   rp.part_code, rp.part_descORDER BY   \"Total Value\" DESCLIMIT 10;"
-#     },
-#     {
-#         "input": "Retrieve the list of Top 10 consumed OEM parts under Accessories from 01-Jan-2024 to 31-Dec-2024.",
-#         "query": "SELECT   rp.part_code AS \"Part Code\",  rp.part_desc AS \"Part Description\",  ROUND(SUM(rp.part_quantity), 1) AS \"Total Count\",  ROUND(SUM(rp.partamount), 1) AS \"Total Value\"FROM   MH_RO_PARTS rpJOIN   MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skWHERE   LOWER(rhd.serv_catgry_desc) = LOWER('Accessories')  AND LOWER(rhd.service_group) = LOWER('Accessories')  AND rp.oem_part_ind = 'Y'  AND rp.part_category_group = 'Spares'  AND rp.part_desc NOT LIKE '%Filter%'  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'GROUP BY   rp.part_code,  rp.part_descORDER BY   SUM(rp.part_quantity) DESCLIMIT 10;"
-#     },
-#     {
-#         "input": "Generate a SQL query to retrieve the list of Top 10 consumed OEM parts under the \"Bodyshop\" category for the period from 01-Jan-2024 to 31-Dec-2024.",
-#         "query": "SELECT   rp.part_code AS \"Part Code\",  rp.part_desc AS \"Part Description\",  ROUND(SUM(rp.part_quantity), 1) AS \"Total Count\",  ROUND(SUM(rp.partamount), 1) AS \"Total Value\"FROM MH_RO_PARTS rpJOIN MH_RO_HDR_DETAILS rhd ON rp.sv_ro_bill_hdr_sk = rhd.sv_ro_bill_hdr_skWHERE LOWER(rhd.serv_catgry_desc) = LOWER('Bodyshop')  AND LOWER(rhd.service_group) = LOWER('Bodyshop')  AND rp.oem_part_ind = 'Y'  AND rhd.ro_bill_date BETWEEN DATE '2024-01-01' AND DATE '2024-12-31'GROUP BY rp.part_code, rp.part_descORDER BY \"Total Value\" DESCLIMIT 10;"
-#     }
-# ]
-    
-
-
-
-
+import json
 
 from langchain_community.vectorstores import Chroma
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_openai import OpenAIEmbeddings
 
 
-# def get_example_selector():
-#     """
-#     Returns a SemanticSimilarityExampleSelector object initialized with the given examples.
-#     """
-#     example_selector = SemanticSimilarityExampleSelector.from_examples(
-#         examples,  # Ensure `examples` is a list of dictionaries
-#         OpenAIEmbeddings(),
-#         Chroma,
-#         k=3,
-#         input_keys=["input"],  # Ensure that 'input' is a key in the examples
-#     )
+def get_example_selector(json_file_path: str):
+    """
+    Returns a SemanticSimilarityExampleSelector initialized with examples from a JSON file.
+    
+    Args:
+        json_file_path (str): Path to the JSON file containing examples
+        
+    Returns:
+        SemanticSimilarityExampleSelector: Selector configured with examples
+    """
+    # Load examples from JSON file
+    with open(json_file_path, 'r', encoding='utf-8') as file:
+        examples = json.load(file)
+    
+    # Validate examples structure
+    if not isinstance(examples, list):
+        raise ValueError("JSON file should contain a list of examples")
+    if len(examples) == 0:
+        raise ValueError("No examples found in JSON file")
+    if not all(isinstance(example, dict) and 'input' in example and 'query' in example for example in examples):
+        raise ValueError("Each example should be a dictionary with 'input' and 'query' keys")
+    
+    # Create example selector
+    example_selector = SemanticSimilarityExampleSelector.from_examples(
+        examples,
+        OpenAIEmbeddings(),
+        Chroma,
+        k=3,
+        input_keys=["input"],
+    )
+    
+    return example_selector
 
-#     return example_selector
-
-# selector = get_example_selector()
-# user_query = "Show me top 10 Simran OEM parts for En-Route in 2024"
-# best_example = selector.select_examples({"input": user_query})
-# print(best_example[0]["input"]) 
-# print(best_example[0]["query"]) 
-# print(best_example[1]["input"]) 
-# print(best_example[1]["query"]) 
-# print(best_example[2]["input"]) 
-# print(best_example[2]["query"]) # Returns the closest SQL query
-
-
-
-
-# # Example usage:
-# selector = get_example_selector("sql_query_examples.json")
-
-
-# user_query = "Show me top 10 Simran OEM parts for En-Route in 2024"
-# best_example = selector.select_examples({"input": user_query})
-# print(best_example[0]["input"]) 
-# print(best_example[0]["query"]) 
-# print(best_example[1]["input"]) 
-# print(best_example[1]["query"]) 
-# print(best_example[2]["input"]) 
-# print(best_example[2]["query"]) # Returns the closest SQL query

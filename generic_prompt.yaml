@@ -34,8 +34,10 @@ unified_prompt: |
     {table_metadata}
 
   Expected JSON Output Format:
-  ```json
-  {
+  - Return only the JSON object.
+  - Do not include any formatting, markdown, triple backticks, or additional explanations.
+  - The output must start directly with the curly braces character and end with curly braces.
+  {{
     "rephrased_query": "<your rephrased query here>",
     "tables_chosen": ["<table_1>", "<table_2>", "..."]
-  }
+  }}
